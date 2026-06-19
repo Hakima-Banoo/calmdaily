@@ -1,0 +1,43 @@
+{
+  "name": "CalmDaily – Daily Wellness",
+  "short_name": "CalmDaily",
+  "description": "Your daily meditation, breathing and sleep companion",
+  "start_url": "/calmdaily/pages/auth.html",
+  "scope": "/calmdaily/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0E0E0E",
+  "theme_color": "#C9A84C",
+  "categories": ["health", "lifestyle", "wellness"],
+  "lang": "en",
+  "icons": [
+    { "src": "icons/icon-72.png",   "sizes": "72x72",   "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-96.png",   "sizes": "96x96",   "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-128.png",  "sizes": "128x128", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-144.png",  "sizes": "144x144", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-152.png",  "sizes": "152x152", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-192.png",  "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-384.png",  "sizes": "384x384", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png",  "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "screenshots": [
+    { "src": "icons/screenshot-1.png", "sizes": "1080x1920", "type": "image/png", "label": "CalmDaily Dashboard" },
+    { "src": "icons/screenshot-2.png", "sizes": "1080x1920", "type": "image/png", "label": "Breathing Exercise" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Breathe",
+      "short_name": "Breathe",
+      "description": "Start a breathing session",
+      "url": "/calmdaily/pages/dashboard.html?page=breathe",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Meditate",
+      "short_name": "Meditate",
+      "description": "Start a meditation session",
+      "url": "/calmdaily/pages/dashboard.html?page=meditate",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
+    }
+  ]
+}
