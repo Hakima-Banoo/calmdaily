@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Welcome to CalmDaily</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--gold:#C9A84C;--gold-light:#E8D5A3;--dark:#0E0E0E;--dark2:#181818;--dark3:#222;--dark4:#2A2A2A;--text:#F0EAD6;--text-muted:#9A9080;--text-dim:#5C5550}
+body{background:var(--dark);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;min-height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.slides-container{flex:1;position:relative;display:flex;align-items:center;justify-content:center}
+.bg{position:fixed;inset:0;pointer-events:none}
+.bg-glow{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,0.07) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);transition:all 1s ease}
+
+/* progress bar */
+.progress-bar{position:fixed;top:0;left:0;right:0;height:2px;background:rgba(255,255,255,0.05);z-index:100}
+.progress-fill{height:100%;background:var(--gold);transition:width 0.5s ease;width:0%}
+
+/* slides */
+.slides{flex:1;display:flex;align-items:center;justify-content:center;padding:2rem;position:relative}
+.slide{position:absolute;width:100%;max-width:520px;padding:2rem;text-align:center;opacity:0;transform:translateX(60px);transition:all 0.5s cubic-bezier(0.4,0,0.2,1);pointer-events:none;visibility:hidden}
+.slide.active{opacity:1;transform:translateX(0);pointer-events:all;visibility:visible}
+.slide.exit{opacity:0;transform:translateX(-60px);visibility:hidden}
+
+.slide-icon{font-size:4rem;margin-bottom:1.5rem;display:block}
+.slide-step{font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem}
+.slide h1{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,5vw,3rem);font-weight:300;line-height:1.15;margin-bottom:1rem}
+.slide h1 em{font-style:italic;color:var(--gold)}
+.slide p{color:var(--text-muted);font-size:0.95rem;line-height:1.75;max-width:400px;margin:0 auto 2rem}
+
+/* option cards */
+.options{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.75rem;margin-bottom:2rem;text-align:left}
+.option{background:var(--dark2);border:0.5px solid rgba(201,168,76,0.12);border-radius:14px;padding:1rem;cursor:pointer;transition:all 0.2s}
+.option:hover{border-color:rgba(201,168,76,0.4);background:rgba(201,168,76,0.05)}
+.option.selected{border-color:var(--gold);background:rgba(201,168,76,0.1)}
+.option-icon{font-size:1.5rem;margin-bottom:0.4rem}
+.option-label{font-size:0.82rem;font-weight:500;color:var(--text)}
+.option-sub{font-size:0.7rem;color:var(--text-muted);margin-top:0.15rem;line-height:1.4}
+
+/* time picker */
+.time-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.6rem;margin-bottom:2rem}
+.time-chip{background:var(--dark2);border:0.5px solid rgba(201,168,76,0.12);border-radius:10px;padding:0.65rem 0.5rem;cursor:pointer;transition:all 0.2s;font-size:0.82rem;color:var(--text-muted);font-family:'DM Sans',sans-serif;text-align:center}
+.time-chip:hover{border-color:rgba(201,168,76,0.4);color:var(--text)}
+.time-chip.selected{border-color:var(--gold);background:rgba(201,168,76,0.1);color:var(--gold)}
+
+/* name input */
+.name-input{width:100%;background:var(--dark3);border:0.5px solid rgba(201,168,76,0.2);border-radius:14px;padding:1rem 1.25rem;font-size:1.1rem;color:var(--text);font-family:'Cormorant Garamond',serif;font-weight:300;outline:none;text-align:center;margin-bottom:2rem;transition:border-color 0.2s}
+.name-input:focus{border-color:var(--gold)}
+.name-input::placeholder{color:var(--text-dim)}
+
+/* buttons */
+.btn-next{background:var(--gold);color:var(--dark);border:none;border-radius:50px;padding:0.9rem 2.5rem;font-size:0.9rem;font-weight:500;cursor:pointer;transition:opacity 0.2s;font-family:'DM Sans',sans-serif;letter-spacing:0.04em}
+.btn-next:hover{opacity:0.85}
+.btn-next:disabled{opacity:0.4;cursor:not-allowed}
+.btn-skip{background:none;border:none;color:var(--text-dim);font-size:0.78rem;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:1rem;display:block;margin-left:auto;margin-right:auto;transition:color 0.2s}
+.btn-skip:hover{color:var(--text-muted)}
+
+/* completion screen */
+.completion-ring{width:120px;height:120px;border-radius:50%;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:3rem;animation:ring-in 0.6s ease}
+@keyframes ring-in{from{transform:scale(0.5);opacity:0}to{transform:scale(1);opacity:1}}
+.pref-summary{background:var(--dark2);border:0.5px solid rgba(201,168,76,0.12);border-radius:14px;padding:1.25rem;margin-bottom:2rem;text-align:left}
+.pref-row{display:flex;align-items:center;gap:0.6rem;padding:0.4rem 0;font-size:0.85rem;color:var(--text-muted)}
+.pref-row span:first-child{font-size:1rem;width:20px;text-align:center}
+.pref-row strong{color:var(--text)}
+</style>
+</head>
+<body>
+<div class="bg"><div class="bg-glow" id="bg-glow"></div></div>
+<div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+<div class="slides-container">
+<div class="slides" id="slides-wrap">
+
+  <!-- SLIDE 1: Welcome -->
+  <div class="slide active" id="slide-0">
+    <span class="slide-icon">🌿</span>
+    <p class="slide-step">Welcome</p>
+    <h1>A calmer life starts <em>today.</em></h1>
+    <p>CalmDaily takes just 2 minutes to personalise for you. Tell us a little about yourself.</p>
+    <button class="btn-next" onclick="nextSlide()">Let's begin →</button>
+  </div>
+
+  <!-- SLIDE 2: What's your name -->
+  <div class="slide" id="slide-1">
+    <span class="slide-icon">👋</span>
+    <p class="slide-step">Step 1 of 4</p>
+    <h1>What should we <em>call you?</em></h1>
+    <p>We'll personalise your daily sessions with your name.</p>
+    <input class="name-input" type="text" id="user-name-input" placeholder="Your first name" maxlength="30" oninput="checkName()"/>
+    <br/>
+    <button class="btn-next" id="btn-name" onclick="nextSlide()" disabled>Continue →</button>
+    <button class="btn-skip" onclick="nextSlide()">Skip for now</button>
+  </div>
+
+  <!-- SLIDE 3: Main goal -->
+  <div class="slide" id="slide-2">
+    <p class="slide-step">Step 2 of 4</p>
+    <h1>What's your main <em>goal?</em></h1>
+    <p>We'll prioritise sessions that match what matters most to you.</p>
+    <div class="options" id="goal-options">
+      <div class="option" onclick="selectOption(this,'goal','reduce-stress')">
+        <div class="option-icon">😮‍💨</div>
+        <div class="option-label">Reduce stress</div>
+        <div class="option-sub">Calm anxiety & tension</div>
+      </div>
+      <div class="option" onclick="selectOption(this,'goal','sleep-better')">
+        <div class="option-icon">😴</div>
+        <div class="option-label">Sleep better</div>
+        <div class="option-sub">Fall asleep faster</div>
+      </div>
+      <div class="option" onclick="selectOption(this,'goal','focus-more')">
+        <div class="option-icon">🎯</div>
+        <div class="option-label">Focus more</div>
+        <div class="option-sub">Clarity & productivity</div>
+      </div>
+      <div class="option" onclick="selectOption(this,'goal','feel-happier')">
+        <div class="option-icon">😊</div>
+        <div class="option-label">Feel happier</div>
+        <div class="option-sub">Mood & positivity</div>
+      </div>
+      <div class="option" onclick="selectOption(this,'goal','manage-anxiety')">
+        <div class="option-icon">🧘</div>
+        <div class="option-label">Manage anxiety</div>
+        <div class="option-sub">Breathing & calm</div>
+      </div>
+      <div class="option" onclick="selectOption(this,'goal','build-habit')">
+        <div class="option-icon">🔥</div>
+        <div class="option-label">Build a habit</div>
+        <div class="option-sub">Daily consistency</div>
+      </div>
+    </div>
+    <button class="btn-next" id="btn-goal" onclick="nextSlide()" disabled>Continue →</button>
+  </div>
+
+  <!-- SLIDE 4: Experience level -->
+  <div class="slide" id="slide-3">
+    <p class="slide-step">Step 3 of 4</p>
+    <h1>How much experience do you <em>have?</em></h1>
+    <p>We'll match session difficulty to your level.</p>
+    <div class="options" id="exp-options">
+      <div class="option" onclick="selectOption(this,'exp','beginner')">
+        <div class="option-icon">🌱</div>
+        <div class="option-label">Beginner</div>
+        <div class="option-sub">New to meditation & breathing</div>
+      </div>
+      <div class="option" onclick="selectOption(this,'exp','some')">
+        <div class="option-icon">🌿</div>
+        <div class="option-label">Some experience</div>
+        <div class="option-sub">I've tried it a few times</div>
+      </div>
+      <div class="option" onclick="selectOption(this,'exp','regular')">
+        <div class="option-icon">🌳</div>
+        <div class="option-label">Regular practice</div>
+        <div class="option-sub">I meditate weekly</div>
+      </div>
+    </div>
+    <button class="btn-next" id="btn-exp" onclick="nextSlide()" disabled>Continue →</button>
+  </div>
+
+  <!-- SLIDE 5: Reminder time -->
+  <div class="slide" id="slide-4">
+    <p class="slide-step">Step 4 of 4</p>
+    <h1>When should we <em>remind you?</em></h1>
+    <p>A daily nudge is the single biggest factor in building a lasting habit.</p>
+    <div class="time-grid" id="time-options">
+      <button class="time-chip" onclick="selectTime(this,'06:00')">6:00 AM<br/><small style="font-size:0.65rem;color:#5C5550">Early bird</small></button>
+      <button class="time-chip" onclick="selectTime(this,'07:00')">7:00 AM<br/><small style="font-size:0.65rem;color:#5C5550">Morning</small></button>
+      <button class="time-chip" onclick="selectTime(this,'08:00')">8:00 AM<br/><small style="font-size:0.65rem;color:#5C5550">Before work</small></button>
+      <button class="time-chip" onclick="selectTime(this,'12:00')">12:00 PM<br/><small style="font-size:0.65rem;color:#5C5550">Lunch break</small></button>
+      <button class="time-chip" onclick="selectTime(this,'18:00')">6:00 PM<br/><small style="font-size:0.65rem;color:#5C5550">After work</small></button>
+      <button class="time-chip" onclick="selectTime(this,'21:00')">9:00 PM<br/><small style="font-size:0.65rem;color:#5C5550">Evening</small></button>
+    </div>
+    <button class="btn-next" id="btn-time" onclick="nextSlide()" disabled>Continue →</button>
+    <button class="btn-skip" onclick="nextSlide()">Skip reminders</button>
+  </div>
+
+  <!-- SLIDE 6: All done! -->
+  <div class="slide" id="slide-5">
+    <div class="completion-ring">✨</div>
+    <p class="slide-step">You're all set</p>
+    <h1>Welcome to <em>CalmDaily</em></h1>
+    <p>Here's your personalised wellness plan:</p>
+    <div class="pref-summary" id="pref-summary"></div>
+    <button class="btn-next" onclick="finishOnboarding()" style="width:100%">Start my journey →</button>
+  </div>
+
+</div>
+</div><!-- end slides-container -->
+
+<script>
+let currentSlide = 0;
+const totalSlides = 6;
+const prefs = { name:'', goal:'', exp:'', time:'' };
+
+function updateProgress() {
+  document.getElementById('progress').style.width = ((currentSlide / (totalSlides-1)) * 100) + '%';
+}
+
+function nextSlide() {
+  const cur = document.getElementById('slide-' + currentSlide);
+  cur.classList.remove('active');
+  cur.classList.add('exit');
+  setTimeout(() => cur.classList.remove('exit'), 500);
+
+  // collect name
+  if (currentSlide === 1) {
+    prefs.name = document.getElementById('user-name-input').value.trim();
+  }
+
+  currentSlide++;
+  if (currentSlide >= totalSlides - 1) buildSummary();
+
+  const next = document.getElementById('slide-' + currentSlide);
+  next.style.opacity = '0';
+  next.style.transform = 'translateX(60px)';
+  next.classList.add('active');
+  requestAnimationFrame(() => {
+    next.style.transition = 'all 0.5s cubic-bezier(0.4,0,0.2,1)';
+    next.style.opacity = '1';
+    next.style.transform = 'translateX(0)';
+  });
+
+  updateProgress();
+
+  // change glow colour per slide
+  const glowColours = ['rgba(201,168,76,0.07)','rgba(76,175,128,0.06)','rgba(100,149,237,0.06)','rgba(201,168,76,0.08)','rgba(147,112,219,0.07)','rgba(201,168,76,0.1)'];
+  document.getElementById('bg-glow').style.background = `radial-gradient(circle,${glowColours[currentSlide]||glowColours[0]} 0%,transparent 70%)`;
+}
+
+function checkName() {
+  const v = document.getElementById('user-name-input').value.trim();
+  document.getElementById('btn-name').disabled = v.length < 1;
+}
+
+function selectOption(el, group, value) {
+  document.querySelectorAll(`#${group}-options .option`).forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  prefs[group] = value;
+  const btnMap = { goal:'btn-goal', exp:'btn-exp' };
+  if (btnMap[group]) document.getElementById(btnMap[group]).disabled = false;
+}
+
+function selectTime(el, time) {
+  document.querySelectorAll('.time-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  prefs.time = time;
+  document.getElementById('btn-time').disabled = false;
+}
+
+function buildSummary() {
+  const goalMap = {
+    'reduce-stress':'Reduce stress & anxiety',
+    'sleep-better':'Sleep better & deeper',
+    'focus-more':'Improve focus & clarity',
+    'feel-happier':'Feel happier & positive',
+    'manage-anxiety':'Manage anxiety',
+    'build-habit':'Build a daily habit'
+  };
+  const expMap = { 'beginner':'Beginner sessions', 'some':'Intermediate sessions', 'regular':'Advanced sessions' };
+  const items = [
+    ['👋', 'Name', prefs.name || 'Not set'],
+    ['🎯', 'Goal', goalMap[prefs.goal] || 'Not set'],
+    ['🌱', 'Level', expMap[prefs.exp] || 'Not set'],
+    ['⏰', 'Reminder', prefs.time ? prefs.time + ' daily' : 'No reminder'],
+  ];
+  document.getElementById('pref-summary').innerHTML = items.map(([icon, label, val]) =>
+    `<div class="pref-row"><span>${icon}</span><span>${label}:</span><strong>${val}</strong></div>`
+  ).join('');
+}
+
+function finishOnboarding() {
+  // Save preferences to localStorage for dashboard to read
+  localStorage.setItem('calmdaily_onboarding', JSON.stringify({
+    ...prefs,
+    completed: true,
+    completedAt: new Date().toISOString()
+  }));
+
+  // If Firebase is configured, save to Firestore via dashboard
+  window.location.href = 'dashboard.html?from=onboarding';
+}
+
+updateProgress();
+</script>
+</body>
+</html>
